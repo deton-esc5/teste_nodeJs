@@ -9,11 +9,21 @@ const authController = {
     try {
       const { nome, email, senha } = req.body
 
+      const userExists = await User.findOne({ email });
+
+      if(userExists) {
+        throw {
+          status: 400,
+          mensagem: 'E-mail já existente'
+        }
+      }
       const user = await User.create({ nome, email, senha });
 
+      user.senha = undefined;
+
       return res.status(201).send({ user });
-    }catch (err) {
-      res.status(400).send ({ mensagem: 'Falha no Registro' });
+    }catch (error) {
+      res.status(error.status || 500).send ({ mensagem: error.mensagem || 'Falha no Registro' });
     }
   },
 
